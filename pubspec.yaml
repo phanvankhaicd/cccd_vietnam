@@ -1,7 +1,7 @@
 # Created by Crt Vavros, copyright © 2022 ZeroPass. All rights reserved.
 name: cccd_vietnam
 description: Read and write data from ID card Viet Nam using NFC
-
+homepage: https://github.com/phanvankhaicd/cccd_vietnam
 version: 1.0.0
 
 environment:

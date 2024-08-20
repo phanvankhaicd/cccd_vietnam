@@ -1,0 +1,32 @@
+# Created by Crt Vavros, copyright © 2022 ZeroPass. All rights reserved.
+name: cccd_vietnam
+description: Read and write data from ID card Viet Nam using NFC
+
+version: 1.0.0
+
+environment:
+  sdk: '>=2.17.1 <3.0.0'
+
+dependencies:
+  archive: ^3.1.2
+  collection: ^1.16.0
+  convert: ^3.0.0
+  crypto: ^3.0.1
+  expandable: ^5.0.1
+  fixnum: ^1.0.0
+  flutter_nfc_kit: ^3.4.2
+  logging: ^1.0.1
+  meta: ^1.3.0
+  tripledes_nullsafety: ^1.0.3
+  pointycastle: ^3.7.4
+  diffie_hellman: ^0.1.2
+  crypto_keys_plus: ^0.4.0 # till cypto_keys lib is not updated
+
+dev_dependencies:
+  flutter:      # needed for flutter_nfc_kit
+    sdk: flutter
+  flutter_lints: ^2.0.1
+  flutter_test: # needed for flutter_nfc_kit
+    sdk: flutter
+  lints: ^2.0.0
+  test: ^1.16.5

@@ -3,8 +3,8 @@
 // Script decrypts BAC encrypted response APDU.
 
 import 'dart:io';
-import 'package:dmrtd/extensions.dart';
-import 'package:dmrtd/internal.dart';
+import 'package:cccd_vietnam/extensions.dart';
+import 'package:cccd_vietnam/internal.dart';
 
 void main(List<String> args) {
   if (args.length != 4) {

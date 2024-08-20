@@ -1,16 +1,16 @@
 // Created by Nejc Skerjanc, copyright © 2023 ZeroPass. All rights reserved.
 
-import 'package:dmrtd/src/proto/dh_pace.dart';
-import 'package:dmrtd/src/proto/ecdh_pace.dart';
+import 'package:cccd_vietnam/src/proto/dh_pace.dart';
+import 'package:cccd_vietnam/src/proto/ecdh_pace.dart';
 import 'package:pointycastle/asn1/primitives/asn1_integer.dart';
 import 'package:pointycastle/asn1/primitives/asn1_sequence.dart';
 import 'package:pointycastle/asn1/primitives/asn1_object_identifier.dart';
 
 import '../asn1ObjectIdentifiers.dart';
-import "package:dmrtd/src/extension/logging_apis.dart";
+import "package:cccd_vietnam/src/extension/logging_apis.dart";
 import 'package:logging/logging.dart';
 
-import "package:dmrtd/src/lds/ef.dart";
+import "package:cccd_vietnam/src/lds/ef.dart";
 
 ///PACEInfo ::= SEQUENCE {
 ///      protocol OBJECT IDENTIFIER(

@@ -2,8 +2,8 @@
 import 'dart:typed_data';
 import 'package:test/test.dart';
 
-import 'package:dmrtd/src/crypto/iso9797.dart';
-import 'package:dmrtd/src/extension/string_apis.dart';
+import 'package:cccd_vietnam/src/crypto/iso9797.dart';
+import 'package:cccd_vietnam/src/extension/string_apis.dart';
 
 
 void main() {

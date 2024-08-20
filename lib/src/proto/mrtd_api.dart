@@ -1,7 +1,7 @@
 // Created by Crt Vavros, copyright © 2022 ZeroPass. All rights reserved.
 import 'dart:typed_data';
 
-import 'package:dmrtd/dmrtd.dart';
+import 'package:cccd_vietnam/dmrtd.dart';
 
 import 'access_key.dart';
 import 'bac.dart';
@@ -15,7 +15,7 @@ import '../lds/df1/df1.dart';
 import '../lds/tlv.dart';
 import '../utils.dart';
 
-import 'package:dmrtd/extensions.dart';
+import 'package:cccd_vietnam/extensions.dart';
 import 'package:logging/logging.dart';
 
 import 'pace.dart';

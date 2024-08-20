@@ -3,10 +3,10 @@
 import 'dart:math';
 import 'dart:typed_data';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:dmrtd/extensions.dart';
-import 'package:dmrtd/src/crypto/crypto_utils.dart';
-import 'package:dmrtd/src/proto/iso7816/command_apdu.dart';
-import 'package:dmrtd/src/proto/iso7816/response_apdu.dart';
+import 'package:cccd_vietnam/extensions.dart';
+import 'package:cccd_vietnam/src/crypto/crypto_utils.dart';
+import 'package:cccd_vietnam/src/proto/iso7816/command_apdu.dart';
+import 'package:cccd_vietnam/src/proto/iso7816/response_apdu.dart';
 
 void _testStatusWord(StatusWord sw, {required int sw1, required int sw2, required bool isSuccess, required bool isWarning, required bool isError, required String description})
 {

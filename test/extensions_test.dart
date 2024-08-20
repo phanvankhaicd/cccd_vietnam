@@ -3,10 +3,10 @@ import 'package:logging/logging.dart';
 import 'package:test/test.dart';
 import 'dart:typed_data';
 
-import 'package:dmrtd/src/extension/logging_apis.dart';
-import 'package:dmrtd/src/extension/datetime_apis.dart';
-import 'package:dmrtd/src/extension/string_apis.dart';
-import 'package:dmrtd/src/extension/uint8list_apis.dart';
+import 'package:cccd_vietnam/src/extension/logging_apis.dart';
+import 'package:cccd_vietnam/src/extension/datetime_apis.dart';
+import 'package:cccd_vietnam/src/extension/string_apis.dart';
+import 'package:cccd_vietnam/src/extension/uint8list_apis.dart';
 
 void main() {
 

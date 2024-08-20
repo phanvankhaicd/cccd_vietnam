@@ -20,7 +20,7 @@ environment:
 publish_to: none
 
 dependencies:
-  dmrtd:
+  cccd_vietnam:
     path: ../
   flutter:
     sdk: flutter

@@ -1,6 +1,6 @@
 //  Created by Crt Vavros, copyright © 2022 ZeroPass. All rights reserved.
 import 'dart:typed_data';
-import 'package:dmrtd/extensions.dart';
+import 'package:cccd_vietnam/extensions.dart';
 
 /// Class defines ISO/IEC 7816-4 response APDU
 class ResponseAPDU {

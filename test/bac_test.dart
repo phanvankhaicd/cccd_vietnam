@@ -2,10 +2,10 @@
 import 'dart:typed_data';
 import 'package:test/test.dart';
 
-import 'package:dmrtd/src/lds/mrz.dart';
-import 'package:dmrtd/src/extension/string_apis.dart';
-import 'package:dmrtd/src/proto/bac.dart';
-import 'package:dmrtd/src/proto/dba_key.dart';
+import 'package:cccd_vietnam/src/lds/mrz.dart';
+import 'package:cccd_vietnam/src/extension/string_apis.dart';
+import 'package:cccd_vietnam/src/proto/bac.dart';
+import 'package:cccd_vietnam/src/proto/dba_key.dart';
 
 void main() {
   test('BAC key seed test', () {

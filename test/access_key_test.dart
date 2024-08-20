@@ -1,16 +1,16 @@
 //  Created by Nejc Skerjanc, copyright © 2024 ZeroPass. All rights reserved.
 
 import 'dart:typed_data';
-import 'package:dmrtd/extensions.dart';
-import 'package:dmrtd/src/lds/asn1ObjectIdentifiers.dart';
+import 'package:cccd_vietnam/extensions.dart';
+import 'package:cccd_vietnam/src/lds/asn1ObjectIdentifiers.dart';
 import 'package:test/test.dart';
 
-import 'package:dmrtd/src/proto/access_key.dart';
-import 'package:dmrtd/src/proto/dba_key.dart';
-import 'package:dmrtd/src/proto/can_key.dart';
+import 'package:cccd_vietnam/src/proto/access_key.dart';
+import 'package:cccd_vietnam/src/proto/dba_key.dart';
+import 'package:cccd_vietnam/src/proto/can_key.dart';
 
 
-import 'package:dmrtd/src/extension/string_apis.dart';
+import 'package:cccd_vietnam/src/extension/string_apis.dart';
 
 
 void main() {

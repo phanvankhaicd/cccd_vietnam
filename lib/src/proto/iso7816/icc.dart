@@ -1,10 +1,10 @@
 // Created by Crt Vavros, copyright © 2022 ZeroPass. All rights reserved.
 import 'dart:math';
 import 'dart:typed_data';
-import 'package:dmrtd/extensions.dart';
-import 'package:dmrtd/src/com/com_provider.dart';
-import 'package:dmrtd/src/lds/tlv.dart';
-import 'package:dmrtd/src/utils.dart';
+import 'package:cccd_vietnam/extensions.dart';
+import 'package:cccd_vietnam/src/com/com_provider.dart';
+import 'package:cccd_vietnam/src/lds/tlv.dart';
+import 'package:cccd_vietnam/src/utils.dart';
 import 'package:logging/logging.dart';
 
 import 'command_apdu.dart';

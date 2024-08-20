@@ -1,9 +1,9 @@
 // Created by Crt Vavros, copyright © 2022 ZeroPass. All rights reserved.
 import 'dart:typed_data';
 
-import 'package:dmrtd/extensions.dart';
-import 'package:dmrtd/src/crypto/aes.dart';
-import 'package:dmrtd/src/crypto/des.dart';
+import 'package:cccd_vietnam/extensions.dart';
+import 'package:cccd_vietnam/src/crypto/aes.dart';
+import 'package:cccd_vietnam/src/crypto/des.dart';
 
 
 /// Class represents Send Sequence Counter as specified in

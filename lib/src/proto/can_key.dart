@@ -1,9 +1,9 @@
 //  Created by Nejc Skerjanc, copyright © 2023 ZeroPass. All rights reserved.
 
 import 'dart:typed_data';
-import 'package:dmrtd/src/lds/asn1ObjectIdentifiers.dart';
+import 'package:cccd_vietnam/src/lds/asn1ObjectIdentifiers.dart';
 import 'package:logging/logging.dart';
-import 'package:dmrtd/extensions.dart';
+import 'package:cccd_vietnam/extensions.dart';
 
 import '../crypto/kdf.dart';
 import 'access_key.dart';

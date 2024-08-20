@@ -4,7 +4,7 @@
 import 'dart:typed_data';
 
 import 'package:collection/collection.dart';
-import 'package:dmrtd/extensions.dart';
+import 'package:cccd_vietnam/extensions.dart';
 import 'package:logging/logging.dart';
 import 'package:meta/meta.dart';
 

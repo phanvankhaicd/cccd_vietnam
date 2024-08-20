@@ -1,8 +1,8 @@
 // Created by Crt Vavros, copyright © 2022 ZeroPass. All rights reserved.
 import 'package:test/test.dart';
 
-import 'package:dmrtd/src/crypto/kdf.dart';
-import 'package:dmrtd/src/extension/string_apis.dart';
+import 'package:cccd_vietnam/src/crypto/kdf.dart';
+import 'package:cccd_vietnam/src/extension/string_apis.dart';
 
 void main() {
 

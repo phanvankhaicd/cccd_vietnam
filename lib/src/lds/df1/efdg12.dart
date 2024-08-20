@@ -4,7 +4,7 @@
 import 'dart:core';
 import 'dart:convert';
 import 'dart:typed_data';
-import 'package:dmrtd/extensions.dart';
+import 'package:cccd_vietnam/extensions.dart';
 
 import 'dg.dart';
 import '../ef.dart';

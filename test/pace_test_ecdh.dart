@@ -4,23 +4,23 @@ import 'dart:ffi';
 import 'dart:typed_data';
 
 import 'package:crypto/crypto.dart';
-import 'package:dmrtd/extensions.dart';
-import 'package:dmrtd/src/lds/asn1ObjectIdentifiers.dart';
-import 'package:dmrtd/src/lds/substruct/paceCons.dart';
-import 'package:dmrtd/src/proto/can_key.dart';
-import 'package:dmrtd/src/proto/ecdh_pace.dart';
-import 'package:dmrtd/src/proto/iso7816/iso7816.dart';
-import 'package:dmrtd/src/proto/pace.dart';
-import 'package:dmrtd/src/proto/public_key_pace.dart';
-import 'package:dmrtd/src/utils.dart';
+import 'package:cccd_vietnam/extensions.dart';
+import 'package:cccd_vietnam/src/lds/asn1ObjectIdentifiers.dart';
+import 'package:cccd_vietnam/src/lds/substruct/paceCons.dart';
+import 'package:cccd_vietnam/src/proto/can_key.dart';
+import 'package:cccd_vietnam/src/proto/ecdh_pace.dart';
+import 'package:cccd_vietnam/src/proto/iso7816/iso7816.dart';
+import 'package:cccd_vietnam/src/proto/pace.dart';
+import 'package:cccd_vietnam/src/proto/public_key_pace.dart';
+import 'package:cccd_vietnam/src/utils.dart';
 import 'package:pointycastle/ecc/api.dart';
 import 'package:test/test.dart';
-import 'package:dmrtd/src/proto/dba_key.dart';
-import 'package:dmrtd/src/proto/iso7816/command_apdu.dart';
-import 'package:dmrtd/src/extension/string_apis.dart';
-import 'package:dmrtd/src/crypto/kdf.dart';
-import 'package:dmrtd/src/crypto/aes.dart';
-import 'package:dmrtd/src/lds/efcard_access.dart';
+import 'package:cccd_vietnam/src/proto/dba_key.dart';
+import 'package:cccd_vietnam/src/proto/iso7816/command_apdu.dart';
+import 'package:cccd_vietnam/src/extension/string_apis.dart';
+import 'package:cccd_vietnam/src/crypto/kdf.dart';
+import 'package:cccd_vietnam/src/crypto/aes.dart';
+import 'package:cccd_vietnam/src/lds/efcard_access.dart';
 
 
 void main(){

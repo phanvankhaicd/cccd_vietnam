@@ -3,8 +3,8 @@ import 'dart:typed_data';
 
 import 'package:test/test.dart';
 
-import 'package:dmrtd/dmrtd.dart';
-import 'package:dmrtd/extensions.dart';
+import 'package:cccd_vietnam/dmrtd.dart';
+import 'package:cccd_vietnam/extensions.dart';
 
 import 'utils.dart';
 

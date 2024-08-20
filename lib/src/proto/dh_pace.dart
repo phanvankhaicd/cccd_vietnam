@@ -3,14 +3,14 @@
 
 import "dart:typed_data";
 
-import "package:dmrtd/src/proto/public_key_pace.dart";
-import "package:dmrtd/src/utils.dart";
-import "package:dmrtd/src/extension/logging_apis.dart";
+import "package:cccd_vietnam/src/proto/public_key_pace.dart";
+import "package:cccd_vietnam/src/utils.dart";
+import "package:cccd_vietnam/src/extension/logging_apis.dart";
 import 'package:pointycastle/export.dart';
 import "package:logging/logging.dart";
 import "package:pointycastle/ecc/api.dart";
 
-import "package:dmrtd/src/crypto/diffie_hellman.dart";
+import "package:cccd_vietnam/src/crypto/diffie_hellman.dart";
 
 import "domain_parameter.dart";
 

@@ -1,7 +1,7 @@
 // Created by Nejc Skerjanc, copyright © 2023 ZeroPass. All rights reserved.
 
 
-import "package:dmrtd/src/extension/logging_apis.dart";
+import "package:cccd_vietnam/src/extension/logging_apis.dart";
 import 'package:logging/logging.dart';
 import 'package:pointycastle/asn1/object_identifiers_database.dart';
 import 'package:collection/collection.dart';

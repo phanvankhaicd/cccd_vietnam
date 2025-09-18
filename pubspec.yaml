@@ -2,7 +2,7 @@
 name: cccd_vietnam
 description: Read and write data from ID card Viet Nam using NFC
 homepage: https://github.com/phanvankhaicd/cccd_vietnam
-version: 1.0.0
+version: 2.0.0
 
 environment:
   sdk: '>=2.17.1 <4.0.0'

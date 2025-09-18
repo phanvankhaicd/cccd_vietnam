@@ -8,8 +8,6 @@ import 'package:cccd_vietnam/extensions.dart';
 import '../crypto/kdf.dart';
 import 'access_key.dart';
 
-
-
 class CanKeysError implements Exception {
   final String message;
   CanKeysError(this.message);
@@ -33,7 +31,8 @@ class CanKey extends AccessKey {
     //3.1.6 CAN is 6 digits long
     final RegExp regex = RegExp(r'^\d{6}$');
     if (!regex.hasMatch(canNumber)) {
-      throw CanKeysError("AccessKey.CanKeys; Code must be exactly 6 digits and only contain numbers");
+      throw CanKeysError(
+          "AccessKey.CanKeys; Code must be exactly 6 digits and only contain numbers");
     }
 
     Uint8List canNumberInList = Uint8List(6);
@@ -44,28 +43,24 @@ class CanKey extends AccessKey {
     _can = canNumberInList;
   }
 
-
   /// Returns K-pi [kpi] to be used in PACE protocol.
-  Uint8List Kpi (CipherAlgorithm cipherAlgorithm, KEY_LENGTH keyLength){
-      if (cipherAlgorithm == CipherAlgorithm.DESede){
-        //_cachedSeed = KDF(sha1, _can, Int32(3)).sublist(0, seedLen);
-        return DeriveKey.desEDE(_can, paceMode: true);
-      }
-      else if (cipherAlgorithm == CipherAlgorithm.AES &&
-               keyLength == KEY_LENGTH.s128) {
-        return DeriveKey.aes128(_can, paceMode: true);
-      }
-      else if (cipherAlgorithm == CipherAlgorithm.AES &&
-                keyLength == KEY_LENGTH.s192) {
-        return DeriveKey.aes192(_can, paceMode: true);
-      }
-      else if (cipherAlgorithm == CipherAlgorithm.AES &&
-                keyLength == KEY_LENGTH.s256) {
-        return DeriveKey.aes256(_can, paceMode: true);
-      }
-      else {
-        throw ArgumentError.value(cipherAlgorithm, null, "CanKeys; Unsupported cipher algorithm");
-      }
+  Uint8List Kpi(CipherAlgorithm cipherAlgorithm, KEY_LENGTH keyLength) {
+    if (cipherAlgorithm == CipherAlgorithm.DESede) {
+      //_cachedSeed = KDF(sha1, _can, Int32(3)).sublist(0, seedLen);
+      return DeriveKey.desEDE(_can, paceMode: true);
+    } else if (cipherAlgorithm == CipherAlgorithm.AES &&
+        keyLength == KEY_LENGTH.s128) {
+      return DeriveKey.aes128(_can, paceMode: true);
+    } else if (cipherAlgorithm == CipherAlgorithm.AES &&
+        keyLength == KEY_LENGTH.s192) {
+      return DeriveKey.aes192(_can, paceMode: true);
+    } else if (cipherAlgorithm == CipherAlgorithm.AES &&
+        keyLength == KEY_LENGTH.s256) {
+      return DeriveKey.aes256(_can, paceMode: true);
+    } else {
+      throw ArgumentError.value(
+          cipherAlgorithm, null, "CanKeys; Unsupported cipher algorithm");
+    }
   }
 
   /// Returns passport number used for calculating key seed.
@@ -73,9 +68,9 @@ class CanKey extends AccessKey {
 
   @override
   String toString() {
-    _log.warning("CanKeys.toString() called. This is very sensitive data. Do not use in production!");
+    _log.warning(
+        "CanKeys.toString() called. This is very sensitive data. Do not use in production!");
     return "CanKeys; CAN: ${_can.hex()}";
     return super.toString();
   }
-
 }

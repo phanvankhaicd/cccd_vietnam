@@ -42,7 +42,6 @@ class EfDG12 extends DataGroup {
   DateTime? get dateOfIssue => _dateOfIssue;
   String? get issuingAuthority => _issuingAuthority;
 
-
   EfDG12.fromBytes(Uint8List data) : super.fromBytes(data);
 
   @override

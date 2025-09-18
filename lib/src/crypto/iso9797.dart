@@ -12,8 +12,10 @@ class ISO9797 {
   static final _log = Logger("ISO9797");
 
   static const int macAlg3_DigestLen = DESCipher.blockSize;
-  static const int macAlg3_Key1Len   = 16; // First possible Alg3 MAC key len is 16 bytes.
-  static const int macAlg3_Key2Len   = 24; // Second possible Alg3 MAC key len is 16 bytes.
+  static const int macAlg3_Key1Len =
+      16; // First possible Alg3 MAC key len is 16 bytes.
+  static const int macAlg3_Key2Len =
+      24; // Second possible Alg3 MAC key len is 16 bytes.
 
   /// Function returns CMAC result according to ISO9797-1 Algorithm 3 scheme
   /// using DES encryption algorithm.
@@ -22,8 +24,8 @@ class ISO9797 {
   /// The [msg] if [padMsg] is set to false should be padded to the nearest multiple of 8.
   /// When [padMsg] is true, the [msg] is padded according to the ISO/IEC 9797-1, padding method 2.
   ///
-  static macAlg3(Uint8List key, Uint8List msg, { bool padMsg = true }) {
-    if(key.length != macAlg3_Key1Len && key.length != macAlg3_Key2Len) {
+  static macAlg3(Uint8List key, Uint8List msg, {bool padMsg = true}) {
+    if (key.length != macAlg3_Key1Len && key.length != macAlg3_Key2Len) {
       throw ArgumentError.value(key, "key length must be 16 or 24");
     }
 
@@ -58,12 +60,12 @@ class ISO9797 {
   // Returns unpadded data according to ISO/IEC 9797-1, padding method 2 scheme.
   static Uint8List unpad(Uint8List data) {
     var i = data.length - 1;
-      while (data[i] == 0x00) {
-          i -= 1;
-      }
-      if(data[i] == 0x80) {
-        return data.sublist(0, i);
-      }
-      return data;
+    while (data[i] == 0x00) {
+      i -= 1;
+    }
+    if (data[i] == 0x80) {
+      return data.sublist(0, i);
+    }
+    return data;
   }
 }

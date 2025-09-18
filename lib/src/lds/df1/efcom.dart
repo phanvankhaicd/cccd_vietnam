@@ -33,42 +33,39 @@ class EfCOM extends ElementaryFile {
   @override
   void parse(final Uint8List content) {
     final tlv = TLV.fromBytes(content);
-    if(tlv.tag != TAG) {
+    if (tlv.tag != TAG) {
       throw EfParseError(
-        "Invalid EF.COM tag=${tlv.tag.hex()}, expected tag=${TAG.hex()}"
-      );
+          "Invalid EF.COM tag=${tlv.tag.hex()}, expected tag=${TAG.hex()}");
     }
 
     // Parse version number
     final data = tlv.value;
     final vtv = TLV.decode(data);
-    if(vtv.tag.value != 0x5F01) {
+    if (vtv.tag.value != 0x5F01) {
       throw EfParseError(
-        "Invalid version object tag=${vtv.tag.value.hex()}, expected version object with tag=5F01"
-      );
+          "Invalid version object tag=${vtv.tag.value.hex()}, expected version object with tag=5F01");
     }
     _ver = String.fromCharCodes(vtv.value);
 
     // Parse string version
     final uvtv = TLV.decode(data.sublist(vtv.encodedLen));
-    if(uvtv.tag.value != 0x5F36) {
+    if (uvtv.tag.value != 0x5F36) {
       throw EfParseError(
-        "Invalid unicode version object tag=${uvtv.tag.value.hex()}, expected unicode version object with tag=5F36"
-      );
+          "Invalid unicode version object tag=${uvtv.tag.value.hex()}, expected unicode version object with tag=5F36");
     }
     _uver = String.fromCharCodes(uvtv.value);
 
     // Parse tag list
-    final tvTagList = TLV.decode(data.sublist(vtv.encodedLen + uvtv.encodedLen));
-    if(tvTagList.tag.value != 0x5C) {
+    final tvTagList =
+        TLV.decode(data.sublist(vtv.encodedLen + uvtv.encodedLen));
+    if (tvTagList.tag.value != 0x5C) {
       throw EfParseError(
-        "Invalid tag list object tag=${tvTagList.tag.value.hex()}, expected tag list object with tag=5C"
-      );
+          "Invalid tag list object tag=${tvTagList.tag.value.hex()}, expected tag list object with tag=5C");
     }
 
     // fill _tags set.
     // Each tag should be represented as 1 byte
-    for(final t in tvTagList.value) {
+    for (final t in tvTagList.value) {
       _tags.add(DgTag(t));
     }
   }

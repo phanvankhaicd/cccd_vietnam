@@ -8,7 +8,7 @@ import '../crypto/iso9797.dart';
 import './ssc.dart';
 
 // ignore: camel_case_types
-class DES_SMCipher implements SMCipher{
+class DES_SMCipher implements SMCipher {
   @override
   CipherAlgorithm type = CipherAlgorithm.DESede;
 
@@ -22,12 +22,20 @@ class DES_SMCipher implements SMCipher{
 
   @override
   Uint8List encrypt(Uint8List data, {SSC? ssc}) {
-    return DESedeEncrypt(key: encKey, iv: Uint8List(DESedeCipher.blockSize), data: data, padData: false);
+    return DESedeEncrypt(
+        key: encKey,
+        iv: Uint8List(DESedeCipher.blockSize),
+        data: data,
+        padData: false);
   }
 
   @override
   Uint8List decrypt(Uint8List edata, {SSC? ssc}) {
-    return DESedeDecrypt(key: encKey, iv: Uint8List(DESedeCipher.blockSize), edata: edata, paddedData: false);
+    return DESedeDecrypt(
+        key: encKey,
+        iv: Uint8List(DESedeCipher.blockSize),
+        edata: edata,
+        paddedData: false);
   }
 
   @override

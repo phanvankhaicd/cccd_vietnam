@@ -28,7 +28,7 @@ class EfDG15 extends DataGroup {
   void parseContent(final Uint8List content) {
     try {
       _pubkey = AAPublicKey.fromBytes(content);
-    } on Exception catch(e) {
+    } on Exception catch (e) {
       throw EfParseError("Failed to parse AAPublicKey from EF.DG15: $e");
     }
   }

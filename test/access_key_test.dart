@@ -9,13 +9,10 @@ import 'package:cccd_vietnam/src/proto/access_key.dart';
 import 'package:cccd_vietnam/src/proto/dba_key.dart';
 import 'package:cccd_vietnam/src/proto/can_key.dart';
 
-
 import 'package:cccd_vietnam/src/extension/string_apis.dart';
 
-
 void main() {
-  test('DBA key testing (for BAC and PACE)', ()
-  {
+  test('DBA key testing (for BAC and PACE)', () {
     //DBA can be used for BAC and PACE
     DBAKey dbaKeys = DBAKey(
         "T22000129", DateTime(1964, 8, 12), DateTime(2010, 10, 31),
@@ -33,11 +30,9 @@ void main() {
     expect(dbaKeys.Kpi(CipherAlgorithm.AES, KEY_LENGTH.s128), tv_K_pi_for_PACE);
   });
 
-  test('CAN key testing', ()
-  {
+  test('CAN key testing', () {
     CanKey canKey = CanKey("123456");
     final tv_K_pi_for_PACE = "591468cda83d65219cccb8560233600f".parseHex();
     expect(canKey.Kpi(CipherAlgorithm.AES, KEY_LENGTH.s128), tv_K_pi_for_PACE);
   });
-
 }

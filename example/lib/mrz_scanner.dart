@@ -77,7 +77,7 @@ class _MrzScannerState extends State<MrzScanner> {
       if (!_isCameraInitialized) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(const SnackBar(content: Text('Camera not initialized')));
+        ).showSnackBar(const SnackBar(content: Text('Camera chưa sẵn sàng')));
         return;
       }
 
@@ -86,7 +86,7 @@ class _MrzScannerState extends State<MrzScanner> {
         setState(() {
           _image = File(photo.path);
           _isProcessing = true;
-          _scanResult = 'Processing image...';
+          _scanResult = 'Đang nhận diện vùng MRZ...';
         });
         await _processImage(_image!);
       }
@@ -94,7 +94,7 @@ class _MrzScannerState extends State<MrzScanner> {
       print('Error taking picture: $e');
       setState(() {
         _isProcessing = false;
-        _scanResult = 'Error taking picture: $e';
+        _scanResult = 'Không thể chụp ảnh: $e';
       });
     }
   }
@@ -108,7 +108,7 @@ class _MrzScannerState extends State<MrzScanner> {
       setState(() {
         _image = File(pickedFile.path);
         _isProcessing = true;
-        _scanResult = 'Processing image...';
+        _scanResult = 'Đang nhận diện vùng MRZ...';
       });
       await _processImage(_image!);
     }
@@ -127,16 +127,16 @@ class _MrzScannerState extends State<MrzScanner> {
       setState(() {
         _isProcessing = false;
         if (mrzData != null) {
-          _scanResult = 'MRZ detected!\n$mrzData';
+          _scanResult = 'Đã nhận diện MRZ thành công';
           widget.onMrzDetected(mrzData);
         } else {
-          _scanResult = 'No valid MRZ found. Please try again.';
+          _scanResult = 'Không tìm thấy MRZ hợp lệ. Vui lòng chụp lại rõ hơn.';
         }
       });
     } catch (e) {
       setState(() {
         _isProcessing = false;
-        _scanResult = 'Error processing image: $e';
+        _scanResult = 'Không thể xử lý ảnh: $e';
       });
     }
   }
@@ -263,7 +263,7 @@ class _MrzScannerState extends State<MrzScanner> {
 
       print('Extracted DOB: $dobString, DOE: $doeString');
 
-      // Convert YYMMDD to MM/DD/YYYY format
+      // Convert YYMMDD to dd-MM-yyyy format.
       final dob = _formatDate(dobString);
       final doe = _formatDate(doeString);
 
@@ -518,7 +518,9 @@ class _MrzScannerState extends State<MrzScanner> {
       // Adjust years (assuming 20YY for most modern documents)
       final fullYear = year > 50 ? 1900 + year : 2000 + year;
 
-      return '$month/$day/$fullYear';
+      final formattedDay = day.toString().padLeft(2, '0');
+      final formattedMonth = month.toString().padLeft(2, '0');
+      return '$formattedDay-$formattedMonth-$fullYear';
     } catch (e) {
       print('Error formatting date: $e');
       return null;
@@ -528,84 +530,155 @@ class _MrzScannerState extends State<MrzScanner> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('MRZ Scanner')),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
+      backgroundColor: const Color(0xFFFFFBF5),
+      appBar: AppBar(
+        backgroundColor: const Color(0xFFB5121B),
+        foregroundColor: Colors.white,
+        elevation: 0,
+        centerTitle: true,
+        title: const Text(
+          'QUÉT MÃ MRZ',
+          style: TextStyle(fontWeight: FontWeight.w800, letterSpacing: 0.4),
+        ),
+      ),
+      body: Stack(
         children: [
-          Expanded(
-            child:
-                _isCameraInitialized
-                    ? Stack(
-                      children: [
-                        CameraPreview(_cameraController!),
-                        // Overlay with guidance
-                        Positioned.fill(
-                          child: CustomPaint(painter: MrzScannerOverlay()),
+          Positioned.fill(
+            child: Image.asset(
+              'assets/images/citizen_background.png',
+              fit: BoxFit.cover,
+              alignment: Alignment.topCenter,
+            ),
+          ),
+          SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 18, 16, 18),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  const Text(
+                    'Đưa 3 dòng mã ở mặt sau thẻ vào đúng khung hình',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: Color(0xFF8F1519),
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  const Text(
+                    'Giữ thiết bị ổn định, đủ sáng và tránh phản chiếu',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(color: Color(0xFF6D625E), fontSize: 13),
+                  ),
+                  const SizedBox(height: 16),
+                  Expanded(
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(22),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF221F1F),
+                          border: Border.all(color: const Color(0xFFE4C7AE)),
                         ),
-                        // Instruction text
-                        Positioned(
-                          top: 20,
-                          left: 0,
-                          right: 0,
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 24,
-                              vertical: 12,
-                            ),
-                            color: Colors.black54,
-                            child: const Text(
-                              'Position the MRZ (machine readable zone) within the frame',
+                        child:
+                            _isCameraInitialized
+                                ? Stack(
+                                  fit: StackFit.expand,
+                                  children: [
+                                    CameraPreview(_cameraController!),
+                                    CustomPaint(painter: MrzScannerOverlay()),
+                                    const Positioned(
+                                      left: 20,
+                                      right: 20,
+                                      bottom: 24,
+                                      child: Text(
+                                        'MRZ • 3 dòng ký tự',
+                                        textAlign: TextAlign.center,
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.w700,
+                                          letterSpacing: 1.2,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                )
+                                : const Center(
+                                  child: CircularProgressIndicator(
+                                    color: Color(0xFFD71920),
+                                  ),
+                                ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+                  AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 250),
+                    child:
+                        _scanResult.isEmpty
+                            ? const SizedBox(height: 20)
+                            : Text(
+                              _scanResult,
+                              key: ValueKey(_scanResult),
                               textAlign: TextAlign.center,
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 16,
+                              style: const TextStyle(
+                                color: Color(0xFF8F1519),
+                                fontWeight: FontWeight.w600,
                               ),
+                            ),
+                  ),
+                  const SizedBox(height: 10),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton.icon(
+                          onPressed:
+                              _isProcessing ? null : _getImageFromGallery,
+                          icon: const Icon(Icons.photo_library_outlined),
+                          label: const Text('CHỌN ẢNH'),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: const Color(0xFFB5121B),
+                            side: const BorderSide(color: Color(0xFFD99B96)),
+                            padding: const EdgeInsets.symmetric(vertical: 15),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(13),
                             ),
                           ),
                         ),
-                      ],
-                    )
-                    : const Center(child: CircularProgressIndicator()),
-          ),
-          Container(
-            color: Colors.white,
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              children: [
-                Text(
-                  _scanResult,
-                  style: const TextStyle(fontSize: 16),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 16),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    ElevatedButton.icon(
-                      onPressed: _isProcessing ? null : _getImageFromCamera,
-                      icon: const Icon(Icons.camera_alt),
-                      label: const Text('Capture'),
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 24,
-                          vertical: 12,
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        flex: 2,
+                        child: ElevatedButton.icon(
+                          onPressed: _isProcessing ? null : _getImageFromCamera,
+                          icon:
+                              _isProcessing
+                                  ? const SizedBox(
+                                    width: 20,
+                                    height: 20,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      color: Colors.white,
+                                    ),
+                                  )
+                                  : const Icon(Icons.camera_alt_outlined),
+                          label: Text(
+                            _isProcessing ? 'ĐANG XỬ LÝ...' : 'CHỤP MRZ',
+                          ),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFFD71920),
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(vertical: 15),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(13),
+                            ),
+                          ),
                         ),
                       ),
-                    ),
-                    ElevatedButton.icon(
-                      onPressed: _isProcessing ? null : _getImageFromGallery,
-                      icon: const Icon(Icons.photo_library),
-                      label: const Text('Gallery'),
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 24,
-                          vertical: 12,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
+                    ],
+                  ),
+                ],
+              ),
             ),
           ),
         ],
@@ -621,26 +694,26 @@ class MrzScannerOverlay extends CustomPainter {
     final double width = size.width;
     final double height = size.height;
 
-    // Define scanner area (bottom third of screen)
+    // MRZ is a wide, shallow block near the lower part of the document.
     final Rect outerRect = Rect.fromLTWH(0, 0, width, height);
     final Rect scannerRect = Rect.fromLTWH(
-      width * 0.1,
-      height * 0.65,
-      width * 0.8,
-      height * 0.2,
+      width * 0.07,
+      height * 0.57,
+      width * 0.86,
+      height * 0.25,
     );
 
     // Define paints
     final Paint backgroundPaint =
         Paint()
-          ..color = Colors.black.withOpacity(0.5)
+          ..color = Colors.black.withValues(alpha: 0.48)
           ..style = PaintingStyle.fill;
 
     final Paint borderPaint =
         Paint()
-          ..color = Colors.white
+          ..color = const Color(0xFFFFD15C)
           ..style = PaintingStyle.stroke
-          ..strokeWidth = 3.0;
+          ..strokeWidth = 4.0;
 
     // Create path for the background with a hole for the scanner area
     final Path backgroundPath =

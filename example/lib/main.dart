@@ -1,12 +1,12 @@
 // Created by Crt Vavros, copyright © 2022 ZeroPass. All rights reserved.
 // ignore_for_file: prefer_adjacent_string_concatenation, prefer_interpolation_to_compose_strings
 
-
 import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:cccd_vietnam/dmrtd.dart';
 import 'package:cccd_vietnam/extensions.dart';
@@ -217,10 +217,9 @@ class _MrtdHomePageState extends State<MrtdHomePage>
   // mrz data
   final _docNumber = TextEditingController(text: '001200004595');
   // final _docNumber = TextEditingController(text: '001200004');
-  final _dob = TextEditingController(text: '04/27/2000'); // date of birth
-  final _doe = TextEditingController(text: '04/27/2025');
+  final _dob = TextEditingController(text: '27-04-2000'); // date of birth
+  final _doe = TextEditingController(text: '27-04-2025');
   final _can = TextEditingController(text: '004595');
-  bool _checkBoxPACE = false;
 
   MrtdData? _mrtdData;
 
@@ -275,14 +274,14 @@ class _MrtdHomePageState extends State<MrtdHomePage>
     if (_dob.text.isEmpty) {
       return null;
     }
-    return DateFormat.yMd().parse(_dob.text);
+    return DateFormat('dd-MM-yyyy').parseStrict(_dob.text);
   }
 
   DateTime? _getDOEDate() {
     if (_doe.text.isEmpty) {
       return null;
     }
-    return DateFormat.yMd().parse(_doe.text);
+    return DateFormat('dd-MM-yyyy').parseStrict(_doe.text);
   }
 
   Future<String?> _pickDate(
@@ -301,7 +300,7 @@ class _MrtdHomePageState extends State<MrtdHomePage>
     );
 
     if (picked != null) {
-      return DateFormat.yMd().format(picked);
+      return DateFormat('dd-MM-yyyy').format(picked);
     }
     return null;
   }
@@ -332,11 +331,17 @@ class _MrtdHomePageState extends State<MrtdHomePage>
         _docNumber.text,
         _getDOBDate()!,
         _getDOEDate()!,
-        paceMode: _checkBoxPACE,
       );
-      _readMRTD(accessKey: bacKeySeed, isPace: _checkBoxPACE);
+      _readMRTD(accessKey: bacKeySeed);
     } else {
       //PACE tab
+      if (Platform.isIOS) {
+        setState(() {
+          _alertMessage = 'CAN / PACE hiện chỉ được hỗ trợ trên Android.';
+        });
+        return;
+      }
+
       String errorText = "";
       if (_can.text.isEmpty) {
         errorText = "Please enter CAN number!";
@@ -1017,291 +1022,388 @@ class _MrtdHomePageState extends State<MrtdHomePage>
   }
 
   PlatformScaffold _buildPage(BuildContext context) => PlatformScaffold(
-    appBar: PlatformAppBar(title: Text('MRTD Example App Quang Anh')),
     iosContentPadding: false,
     iosContentBottomPadding: false,
     body: Material(
-      child: SafeArea(
-        child: Padding(
-          padding: EdgeInsets.all(8.0),
-          child: SingleChildScrollView(
-            controller: _scrollController,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: <Widget>[
-                _buildForm(context),
-                SizedBox(height: 20),
-                PlatformElevatedButton(
-                  // btn Read MRTD
-                  onPressed: _buttonPressed,
-                  child: PlatformText(
-                    _isReading ? 'Reading ...' : 'Read Passport',
-                  ),
-                ),
-                SizedBox(height: 20),
-                Row(
-                  children: <Widget>[
-                    Text(
-                      'NFC available:',
-                      style: TextStyle(
-                        fontSize: 18.0,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    SizedBox(width: 4),
-                    Text(
-                      _isNfcAvailable ? "Yes" : "No",
-                      style: TextStyle(fontSize: 18.0),
-                    ),
-                  ],
-                ),
-                SizedBox(height: 15),
-                Text(
-                  _alertMessage,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 15.0, fontWeight: FontWeight.bold),
-                ),
-                SizedBox(height: 15),
-                Padding(
-                  padding: EdgeInsets.all(8.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      Text(
-                        _mrtdData != null ? "Passport Data:" : "",
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 15.0,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      Padding(
-                        padding: EdgeInsets.only(
-                          left: 16.0,
-                          top: 8.0,
-                          bottom: 8.0,
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: _mrtdDataWidgets(),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
+      color: const Color(0xFFFFFBF5),
+      child: Stack(
+        children: [
+          Positioned.fill(
+            child: Image.asset(
+              'assets/images/citizen_background.png',
+              fit: BoxFit.cover,
+              alignment: Alignment.topCenter,
             ),
           ),
-        ),
+          SafeArea(
+            child: SingleChildScrollView(
+              controller: _scrollController,
+              padding: const EdgeInsets.fromLTRB(18, 22, 18, 32),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  _buildHeader(),
+                  const SizedBox(height: 22),
+                  _buildForm(context),
+                  if (_alertMessage.isNotEmpty) ...[
+                    const SizedBox(height: 14),
+                    Text(
+                      _alertMessage,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        color: Color(0xFF9F1518),
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                  if (_mrtdData != null) ...[
+                    const SizedBox(height: 20),
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.95),
+                        borderRadius: BorderRadius.circular(18),
+                        border: Border.all(color: const Color(0xFFE8D4C0)),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: _mrtdDataWidgets(),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
     ),
   );
 
-  Widget _buildForm(BuildContext context) {
-    return Column(
-      children: <Widget>[
-        TabBar(
-          controller: _tabController,
-          labelColor: Colors.blue,
-          tabs: const <Widget>[Tab(text: 'DBA'), Tab(text: 'PACE')],
+  Widget _buildHeader() => const Column(
+    children: [
+      CircleAvatar(
+        radius: 34,
+        backgroundColor: Color(0xFFFFE5A3),
+        child: Icon(Icons.account_balance, color: Color(0xFFB20E17), size: 42),
+      ),
+      SizedBox(height: 10),
+      Text(
+        'QUÉT CĂN CƯỚC CÔNG DÂN',
+        textAlign: TextAlign.center,
+        style: TextStyle(
+          color: Color(0xFF9F1016),
+          fontSize: 22,
+          fontWeight: FontWeight.w800,
         ),
+      ),
+      SizedBox(height: 5),
+      Text(
+        'Kết nối – Chính xác – An toàn',
+        style: TextStyle(color: Color(0xFF555555), fontSize: 15),
+      ),
+    ],
+  );
+
+  Widget _buildForm(BuildContext context) => Container(
+    padding: const EdgeInsets.fromLTRB(16, 16, 16, 18),
+    decoration: BoxDecoration(
+      color: Colors.white.withValues(alpha: 0.96),
+      borderRadius: BorderRadius.circular(22),
+      border: Border.all(color: const Color(0xFFE8D4C0)),
+      boxShadow: const [
+        BoxShadow(
+          color: Color(0x1F7B3C1B),
+          blurRadius: 22,
+          offset: Offset(0, 8),
+        ),
+      ],
+    ),
+    child: Column(
+      children: [
         Container(
-          height: 400, // Increased height to accommodate the new scan button
+          height: 48,
+          padding: const EdgeInsets.all(4),
+          decoration: BoxDecoration(
+            color: const Color(0xFFF8EFE7),
+            borderRadius: BorderRadius.circular(14),
+          ),
+          child: TabBar(
+            controller: _tabController,
+            indicatorSize: TabBarIndicatorSize.tab,
+            dividerColor: Colors.transparent,
+            labelColor: Colors.white,
+            unselectedLabelColor: const Color(0xFF8A4B46),
+            labelStyle: const TextStyle(fontWeight: FontWeight.w700),
+            indicator: BoxDecoration(
+              color: const Color(0xFFB5121B),
+              borderRadius: BorderRadius.circular(11),
+            ),
+            tabs: const [Tab(text: 'MRZ / DBA'), Tab(text: 'CAN / PACE')],
+          ),
+        ),
+        const SizedBox(height: 18),
+        SizedBox(
+          height: 520,
           child: TabBarView(
             controller: _tabController,
-            children: <Widget>[
-              Card(
-                borderOnForeground: false,
-                elevation: 0,
-                color: Colors.white,
-                margin: const EdgeInsets.all(16.0),
-                child: Form(
-                  key: _mrzData,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      // Add a scan button at the top
-                      Container(
-                        width: double.infinity,
-                        margin: const EdgeInsets.only(bottom: 16.0),
-                        child: ElevatedButton.icon(
-                          onPressed: _isReading ? null : _navigateToMrzScanner,
-                          icon: Icon(Icons.document_scanner),
-                          label: Text('Scan Passport MRZ'),
-                          style: ElevatedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 12.0),
-                          ),
-                        ),
-                      ),
-                      TextFormField(
-                        enabled: !_disabledInput(),
-                        controller: _docNumber,
-                        decoration: const InputDecoration(
-                          border: OutlineInputBorder(),
-                          labelText: 'Passport number',
-                          fillColor: Colors.white,
-                        ),
-                        inputFormatters: <TextInputFormatter>[
-                          FilteringTextInputFormatter.allow(
-                            RegExp(r'[A-Z0-9]+'),
-                          ),
-                          LengthLimitingTextInputFormatter(14),
-                        ],
-                        textInputAction: TextInputAction.done,
-                        textCapitalization: TextCapitalization.characters,
-                        autofocus: true,
-                        validator: (value) {
-                          if (value?.isEmpty ?? false) {
-                            return 'Please enter passport number';
-                          }
-                          return null;
-                        },
-                      ),
-                      SizedBox(height: 12),
-                      TextFormField(
-                        enabled: !_disabledInput(),
-                        controller: _dob,
-                        decoration: const InputDecoration(
-                          border: OutlineInputBorder(),
-                          labelText: 'Date of Birth',
-                          fillColor: Colors.white,
-                        ),
-                        autofocus: false,
-                        validator: (value) {
-                          if (value?.isEmpty ?? false) {
-                            return 'Please select Date of Birth';
-                          }
-                          return null;
-                        },
-                        onTap: () async {
-                          FocusScope.of(context).requestFocus(FocusNode());
-                          // Can pick date which dates 15 years back or more
-                          final now = DateTime.now();
-                          final firstDate = DateTime(
-                            now.year - 90,
-                            now.month,
-                            now.day,
-                          );
-                          final lastDate = DateTime(
-                            now.year - 15,
-                            now.month,
-                            now.day,
-                          );
-                          final initDate = _getDOBDate();
-                          final date = await _pickDate(
-                            context,
-                            firstDate,
-                            initDate ?? lastDate,
-                            lastDate,
-                          );
+            children: [_buildDbaForm(context), _buildCanForm()],
+          ),
+        ),
+      ],
+    ),
+  );
 
-                          FocusScope.of(context).requestFocus(FocusNode());
-                          if (date != null) {
-                            _dob.text = date;
-                          }
-                        },
-                      ),
-                      SizedBox(height: 12),
-                      TextFormField(
-                        enabled: !_disabledInput(),
-                        controller: _doe,
-                        decoration: const InputDecoration(
-                          border: OutlineInputBorder(),
-                          labelText: 'Date of Expiry',
-                          fillColor: Colors.white,
-                        ),
-                        autofocus: false,
-                        validator: (value) {
-                          if (value?.isEmpty ?? false) {
-                            return 'Please select Date of Expiry';
-                          }
-                          return null;
-                        },
-                        onTap: () async {
-                          FocusScope.of(context).requestFocus(FocusNode());
-                          // Can pick date from tomorrow and up to 10 years
-                          final now = DateTime.now();
-                          final firstDate = DateTime(
-                            now.year,
-                            now.month,
-                            now.day + 1,
-                          );
-                          final lastDate = DateTime(
-                            now.year + 10,
-                            now.month + 6,
-                            now.day,
-                          );
-                          final initDate = _getDOEDate();
-                          final date = await _pickDate(
-                            context,
-                            firstDate,
-                            initDate ?? firstDate,
-                            lastDate,
-                          );
+  Widget _buildDbaForm(BuildContext context) => Form(
+    key: _mrzData,
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        _sectionTitle('assets/images/scan_id.png', 'THÔNG TIN CÔNG DÂN'),
+        const SizedBox(height: 10),
+        _platformNotice(
+          icon: Icons.phone_iphone,
+          text: 'MRZ hỗ trợ trên cả iOS và Android',
+          supported: true,
+        ),
+        const SizedBox(height: 14),
+        _styledField(
+          controller: _docNumber,
+          label: 'Số căn cước công dân',
+          asset: 'assets/images/identity.png',
+          inputFormatters: [
+            FilteringTextInputFormatter.allow(RegExp(r'[A-Z0-9]+')),
+            LengthLimitingTextInputFormatter(14),
+          ],
+        ),
+        const SizedBox(height: 13),
+        _dateField(context, controller: _dob, label: 'Ngày sinh', isDob: true),
+        const SizedBox(height: 13),
+        _dateField(
+          context,
+          controller: _doe,
+          label: 'Ngày hết hạn',
+          isDob: false,
+        ),
+        const Spacer(),
+        OutlinedButton.icon(
+          onPressed: _isReading ? null : _navigateToMrzScanner,
+          icon: const Icon(Icons.document_scanner_outlined),
+          label: const Text('QUÉT MRZ TỪ CAMERA'),
+          style: OutlinedButton.styleFrom(
+            foregroundColor: const Color(0xFFB5121B),
+            side: const BorderSide(color: Color(0xFFE0A8A3)),
+            padding: const EdgeInsets.symmetric(vertical: 12),
+          ),
+        ),
+        const SizedBox(height: 10),
+        _readButton(),
+      ],
+    ),
+  );
 
-                          FocusScope.of(context).requestFocus(FocusNode());
-                          if (date != null) {
-                            _doe.text = date;
-                          }
-                        },
-                      ),
-                      SizedBox(height: 12),
-                      CheckboxListTile(
-                        title: Text('DBA with PACE'),
-                        value: _checkBoxPACE,
-                        onChanged: (newValue) {
-                          setState(() {
-                            _checkBoxPACE = !_checkBoxPACE;
-                          });
-                        },
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              Card(
-                borderOnForeground: false,
-                elevation: 0,
-                color: Colors.white,
-                //shadowColor: Colors.white,
-                margin: const EdgeInsets.all(16.0),
-                child: Form(
-                  key: _canData,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      TextFormField(
-                        enabled: !_disabledInput(),
-                        controller: _can,
-                        decoration: const InputDecoration(
-                          border: OutlineInputBorder(),
-                          labelText: 'CAN number',
-                          fillColor: Colors.white,
-                        ),
-                        inputFormatters: <TextInputFormatter>[
-                          FilteringTextInputFormatter.allow(RegExp(r'[0-9]+')),
-                          LengthLimitingTextInputFormatter(6),
-                        ],
-                        textInputAction: TextInputAction.done,
-                        textCapitalization: TextCapitalization.characters,
-                        autofocus: true,
-                        validator: (value) {
-                          if (value?.isEmpty ?? false) {
-                            return 'Please enter CAN number';
-                          }
-                          return null;
-                        },
-                      ),
-                    ],
-                  ),
+  Widget _buildCanForm() => Form(
+    key: _canData,
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        _sectionTitle('assets/images/verified.png', 'XÁC THỰC BẰNG MÃ CAN'),
+        const SizedBox(height: 10),
+        _platformNotice(
+          icon: Icons.android,
+          text:
+              Platform.isIOS
+                  ? 'CAN / PACE không hỗ trợ trên iOS'
+                  : 'CAN / PACE chỉ hỗ trợ trên Android',
+          supported: !Platform.isIOS,
+        ),
+        const SizedBox(height: 18),
+        const Text(
+          'Nhập mã CAN gồm 6 chữ số được in ở mặt trước thẻ căn cước để thiết lập kết nối PACE an toàn.',
+          style: TextStyle(color: Color(0xFF68615E), height: 1.45),
+        ),
+        const SizedBox(height: 22),
+        _styledField(
+          controller: _can,
+          label: 'Mã CAN',
+          asset: 'assets/images/identity.png',
+          keyboardType: TextInputType.number,
+          platformEnabled: !Platform.isIOS,
+          inputFormatters: [
+            FilteringTextInputFormatter.digitsOnly,
+            LengthLimitingTextInputFormatter(6),
+          ],
+        ),
+        const SizedBox(height: 18),
+        Container(
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            color: const Color(0xFFFFF8EB),
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: const Color(0xFFF1D08A)),
+          ),
+          child: const Row(
+            children: [
+              Icon(Icons.shield_outlined, color: Color(0xFFB5121B)),
+              SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  'Kết nối được mã hóa và chỉ hoạt động khi thẻ ở gần thiết bị.',
+                  style: TextStyle(color: Color(0xFF765D46), height: 1.35),
                 ),
               ),
             ],
           ),
         ),
+        const Spacer(),
+        _readButton(enabled: !Platform.isIOS),
+        const SizedBox(height: 10),
+        const Text(
+          'Đặt thẻ căn cước công dân gần thiết bị để bắt đầu đọc',
+          textAlign: TextAlign.center,
+          style: TextStyle(color: Color(0xFF77706C), fontSize: 12.5),
+        ),
       ],
-    );
-  }
+    ),
+  );
+
+  Widget _sectionTitle(String asset, String title) => Row(
+    children: [
+      Image.asset(asset, width: 34, height: 34),
+      const SizedBox(width: 10),
+      Text(
+        title,
+        style: const TextStyle(
+          color: Color(0xFFAA1118),
+          fontSize: 16,
+          fontWeight: FontWeight.w800,
+        ),
+      ),
+    ],
+  );
+
+  Widget _platformNotice({
+    required IconData icon,
+    required String text,
+    required bool supported,
+  }) => Container(
+    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
+    decoration: BoxDecoration(
+      color: supported ? const Color(0xFFF1F8F1) : const Color(0xFFFFF1F0),
+      borderRadius: BorderRadius.circular(11),
+      border: Border.all(
+        color: supported ? const Color(0xFFB8D8B9) : const Color(0xFFE6B1AD),
+      ),
+    ),
+    child: Row(
+      children: [
+        Icon(
+          icon,
+          size: 19,
+          color: supported ? const Color(0xFF397A3D) : const Color(0xFFB5121B),
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Text(
+            text,
+            style: TextStyle(
+              color:
+                  supported ? const Color(0xFF397A3D) : const Color(0xFF9F1518),
+              fontSize: 12.5,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ),
+      ],
+    ),
+  );
+
+  Widget _styledField({
+    required TextEditingController controller,
+    required String label,
+    required String asset,
+    List<TextInputFormatter>? inputFormatters,
+    TextInputType? keyboardType,
+    VoidCallback? onTap,
+    bool platformEnabled = true,
+  }) => TextFormField(
+    controller: controller,
+    enabled: platformEnabled && !_disabledInput(),
+    readOnly: onTap != null,
+    onTap: onTap,
+    keyboardType: keyboardType,
+    inputFormatters: inputFormatters,
+    style: const TextStyle(fontSize: 18, color: Color(0xFF341E1D)),
+    decoration: InputDecoration(
+      labelText: label,
+      prefixIcon: Padding(
+        padding: const EdgeInsets.all(13),
+        child: Image.asset(asset, width: 25, height: 25),
+      ),
+      filled: true,
+      fillColor: const Color(0xFFFFFEFC),
+      contentPadding: const EdgeInsets.symmetric(vertical: 18, horizontal: 14),
+      border: OutlineInputBorder(borderRadius: BorderRadius.circular(13)),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(13),
+        borderSide: const BorderSide(color: Color(0xFFDCCFC6)),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(13),
+        borderSide: const BorderSide(color: Color(0xFFB5121B), width: 1.5),
+      ),
+    ),
+    validator:
+        (value) => (value?.isEmpty ?? true) ? 'Vui lòng nhập $label' : null,
+  );
+
+  Widget _dateField(
+    BuildContext context, {
+    required TextEditingController controller,
+    required String label,
+    required bool isDob,
+  }) => _styledField(
+    controller: controller,
+    label: label,
+    asset: 'assets/images/calendar.png',
+    onTap: () async {
+      final now = DateTime.now();
+      final firstDate = isDob ? DateTime(now.year - 90) : now;
+      final lastDate =
+          isDob ? DateTime(now.year - 15) : DateTime(now.year + 10, 6);
+      final current = isDob ? _getDOBDate() : _getDOEDate();
+      final date = await _pickDate(
+        context,
+        firstDate,
+        current ?? (isDob ? lastDate : firstDate),
+        lastDate,
+      );
+      if (date != null) controller.text = date;
+    },
+  );
+
+  Widget _readButton({bool enabled = true}) => ElevatedButton(
+    onPressed: !enabled || _disabledInput() ? null : _buttonPressed,
+    style: ElevatedButton.styleFrom(
+      backgroundColor: const Color(0xFFD71920),
+      foregroundColor: Colors.white,
+      disabledBackgroundColor: const Color(0xFFE8A8A8),
+      padding: const EdgeInsets.symmetric(vertical: 15),
+      elevation: 4,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(13)),
+    ),
+    child: Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Image.asset('assets/images/nfc_scan.png', width: 30, height: 30),
+        const SizedBox(width: 10),
+        Text(
+          _isReading ? 'ĐANG ĐỌC THẺ...' : 'ĐỌC THÔNG TIN THẺ',
+          style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 15),
+        ),
+      ],
+    ),
+  );
 
   void extractCertificatesFromSOD(Uint8List sodBytes) {
     print('➡️ SOD bytes length: ${sodBytes.length}');

@@ -8,6 +8,21 @@ https://github.com/ZeroPass/dmrtd?tab=readme-ov-file#dart-library-for-icao-machi
 DMRTD is dart implementation of [ICAO 9303](https://www.icao.int/publications/pages/publication.aspx?docnum=9303) standard.
 Library provide APIs to send commands to and read data from MRTD.
 
+## Example application
+
+The included Flutter example supports MRZ/DBA reading on iOS and Android. CAN/PACE reading is currently available on Android only.
+
+<table>
+  <tr>
+    <td align="center"><strong>MRZ / DBA</strong></td>
+    <td align="center"><strong>CAN / PACE</strong></td>
+  </tr>
+  <tr>
+    <td><img src="doc/images/mrz-dba-example.png" alt="MRZ and DBA example screen" width="360"></td>
+    <td><img src="doc/images/can-pace-example.png" alt="CAN and PACE example screen" width="360"></td>
+  </tr>
+</table>
+
 ## Key features
 * PACE & BAC session key establishment protocol
 * Reading all elementary files from MRTD, e.g.: EF.DG1, EF.DG2, EF.DG11, EF.DG12, EF.DG15 ...  

@@ -8,6 +8,7 @@ import 'package:cccd_vietnam/extensions.dart';
 import 'package:logging/logging.dart';
 import 'package:meta/meta.dart';
 
+import '../../extensions.dart';
 import '../crypto/des.dart';
 import '../crypto/iso9797.dart';
 import '../crypto/kdf.dart';

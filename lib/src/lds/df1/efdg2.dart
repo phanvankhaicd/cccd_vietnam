@@ -149,9 +149,10 @@ class EfDG2 extends DataGroup {
     }
 
     var data = firstBlock.value;
-    if (data[0] != 0x46 &&
-        data[1] != 0x41 &&
-        data[2] != 0x43 &&
+    if (data.length < 14 ||
+        data[0] != 0x46 ||
+        data[1] != 0x41 ||
+        data[2] != 0x43 ||
         data[3] != 0x00) {
       throw EfParseError("Biometric data block is invalid");
     }
@@ -231,15 +232,23 @@ class EfDG2 extends DataGroup {
     quality = _extractContent(data, start: offset, end: offset + 2);
     offset += 2;
 
-    imageData = sbh.first.value.sublist(offset);
+    final imageEnd = 14 + facialRecordDataLength;
+    if (imageEnd < offset || imageEnd > data.length) {
+      throw EfParseError('Invalid DG2 facial image length');
+    }
+    imageData = data.sublist(offset, imageEnd);
   }
 
   int _extractContent(Uint8List data, {required int start, required int end}) {
-    if (end - start == 1) {
-      return data.sublist(start, end).buffer.asByteData().getInt8(0);
-    } else if (end - start < 4)
-      return data.sublist(start, end).buffer.asByteData().getInt16(0);
-    // else if(end - start == 4)
-    return data.sublist(start, end).buffer.asByteData().getInt32(0);
+    if (start < 0 || end <= start || end > data.length) {
+      throw EfParseError('Truncated DG2 facial record');
+    }
+    // All fields in this record are unsigned big-endian values, including
+    // three-byte feature and pose fields.
+    var value = 0;
+    for (var i = start; i < end; i++) {
+      value = (value << 8) | data[i];
+    }
+    return value;
   }
 }

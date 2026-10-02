@@ -18,6 +18,10 @@ import 'package:intl/intl.dart';
 
 import 'package:asn1lib/asn1lib.dart';
 import 'mrz_scanner_screen.dart';
+import 'mrz_document_number.dart';
+import 'data_group_decoder.dart';
+import 'data_group_panel.dart';
+import 'document_date_picker.dart';
 
 class MrtdData {
   EfCardAccess? cardAccess;
@@ -263,7 +267,7 @@ class _MrtdHomePageState extends State<MrtdHomePage>
     // If the widget was removed from the tree while the asynchronous platform
     // message was in flight, we want to discard the reply rather than calling
     // setState to update our non-existent appearance.
-    if (!mounted) return;
+    if (!mounted || _isNfcAvailable == isNfcAvailable) return;
 
     setState(() {
       _isNfcAvailable = isNfcAvailable;
@@ -328,7 +332,7 @@ class _MrtdHomePageState extends State<MrtdHomePage>
       if (errorText.isNotEmpty) return;
 
       final bacKeySeed = DBAKey(
-        _docNumber.text,
+        bacDocumentNumber(_docNumber.text),
         _getDOBDate()!,
         _getDOEDate()!,
       );
@@ -430,7 +434,7 @@ class _MrtdHomePageState extends State<MrtdHomePage>
           print('dob: ${_getDOBDate()}');
           print('doe: ${_getDOEDate()}');
           final dbakey = DBAKey(
-            _docNumber.text,
+            bacDocumentNumber(_docNumber.text),
             _getDOBDate()!,
             _getDOEDate()!,
           );
@@ -498,6 +502,7 @@ class _MrtdHomePageState extends State<MrtdHomePage>
 
         if (mrtdData.com!.dgTags.contains(EfDG13.TAG)) {
           mrtdData.dg13 = await passport.readEfDG13();
+          readEfDG13(mrtdData.dg13!.toBytes());
         }
 
         if (mrtdData.com!.dgTags.contains(EfDG14.TAG)) {
@@ -609,7 +614,7 @@ class _MrtdHomePageState extends State<MrtdHomePage>
 
       _nfc.setIosAlertMessage("Initiating session ...");
       final bacKeySeed = DBAKey(
-        _docNumber.text,
+        bacDocumentNumber(_docNumber.text),
         _getDOBDate()!,
         _getDOEDate()!,
       );
@@ -671,6 +676,7 @@ class _MrtdHomePageState extends State<MrtdHomePage>
 
       if (mrtdData.com!.dgTags.contains(EfDG13.TAG)) {
         mrtdData.dg13 = await passport.readEfDG13();
+        readEfDG13(mrtdData.dg13!.toBytes());
       }
 
       if (mrtdData.com!.dgTags.contains(EfDG14.TAG)) {
@@ -758,39 +764,18 @@ class _MrtdHomePageState extends State<MrtdHomePage>
   Widget _makeMrtdDataWidget({
     required String header,
     required String collapsedText,
-    required dataText,
-  }) {
-    return ExpandablePanel(
-      theme: const ExpandableThemeData(
-        headerAlignment: ExpandablePanelHeaderAlignment.center,
-        tapBodyToCollapse: true,
-        hasIcon: true,
-        iconColor: Colors.red,
-      ),
-      header: Text(header),
-      collapsed: Text(
-        collapsedText,
-        softWrap: true,
-        maxLines: 2,
-        overflow: TextOverflow.ellipsis,
-      ),
-      expanded: Container(
-        padding: const EdgeInsets.all(18),
-        color: Color.fromARGB(255, 239, 239, 239),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            PlatformTextButton(
-              child: Text('Copy'),
-              onPressed: () => Clipboard.setData(ClipboardData(text: dataText)),
-              padding: const EdgeInsets.all(8),
-            ),
-            SelectableText(dataText, textAlign: TextAlign.left),
-          ],
-        ),
-      ),
-    );
-  }
+    String? dataText,
+    Uint8List? rawBytes,
+    Uint8List? imageBytes,
+    bool jpeg2000 = false,
+  }) => DataGroupPanel(
+    header: header,
+    collapsedText: collapsedText,
+    text: dataText ?? decodeDataGroup(rawBytes!, dg13: header == 'EF.DG13'),
+    rawBytes: rawBytes,
+    imageBytes: imageBytes,
+    jpeg2000: jpeg2000,
+  );
 
   List<Widget> _mrtdDataWidgets() {
     List<Widget> list = [];
@@ -811,7 +796,7 @@ class _MrtdHomePageState extends State<MrtdHomePage>
         _makeMrtdDataWidget(
           header: 'EF.CardAccess',
           collapsedText: '',
-          dataText: _mrtdData!.cardAccess!.toBytes().hex(),
+          rawBytes: _mrtdData!.cardAccess!.toBytes(),
         ),
       );
     }
@@ -821,18 +806,17 @@ class _MrtdHomePageState extends State<MrtdHomePage>
         _makeMrtdDataWidget(
           header: 'EF.CardSecurity',
           collapsedText: '',
-          dataText: _mrtdData!.cardSecurity!.toBytes().hex(),
+          rawBytes: _mrtdData!.cardSecurity!.toBytes(),
         ),
       );
     }
 
     if (_mrtdData!.sod != null) {
-      extractCertificatesFromSOD(_mrtdData!.sod!.toBytes());
       list.add(
         _makeMrtdDataWidget(
           header: 'EF.SOD',
           collapsedText: '',
-          dataText: base64Encode(_mrtdData!.sod!.toBytes()),
+          rawBytes: _mrtdData!.sod!.toBytes(),
         ),
       );
     }
@@ -860,9 +844,17 @@ class _MrtdHomePageState extends State<MrtdHomePage>
     if (_mrtdData!.dg2 != null) {
       list.add(
         _makeMrtdDataWidget(
-          header: 'EF.DG2',
-          collapsedText: '',
-          dataText: _mrtdData!.dg2!.toBytes().hex(),
+          header: 'EF.DG2 — Ảnh chân dung',
+          collapsedText: 'Ảnh chân dung và thông tin ảnh',
+          dataText:
+              _mrtdData!.dg2!.imageData == null
+                  ? 'DG2 không có ảnh có thể trích xuất.'
+                  : 'Kích thước: ${_mrtdData!.dg2!.imageWidth} × ${_mrtdData!.dg2!.imageHeight}\n'
+                      'Định dạng: ${_mrtdData!.dg2!.imageType == ImageType.jpeg2000 ? 'JPEG 2000' : 'JPEG'}\n'
+                      'Dung lượng: ${_mrtdData!.dg2!.imageData!.length} byte',
+          imageBytes: _mrtdData!.dg2!.imageData,
+          jpeg2000: _mrtdData!.dg2!.imageType == ImageType.jpeg2000,
+          rawBytes: _mrtdData!.dg2!.toBytes(),
         ),
       );
     }
@@ -872,7 +864,7 @@ class _MrtdHomePageState extends State<MrtdHomePage>
         _makeMrtdDataWidget(
           header: 'EF.DG3',
           collapsedText: '',
-          dataText: _mrtdData!.dg3!.toBytes().hex(),
+          rawBytes: _mrtdData!.dg3!.toBytes(),
         ),
       );
     }
@@ -882,7 +874,7 @@ class _MrtdHomePageState extends State<MrtdHomePage>
         _makeMrtdDataWidget(
           header: 'EF.DG4',
           collapsedText: '',
-          dataText: _mrtdData!.dg4!.toBytes().hex(),
+          rawBytes: _mrtdData!.dg4!.toBytes(),
         ),
       );
     }
@@ -892,7 +884,7 @@ class _MrtdHomePageState extends State<MrtdHomePage>
         _makeMrtdDataWidget(
           header: 'EF.DG5',
           collapsedText: '',
-          dataText: _mrtdData!.dg5!.toBytes().hex(),
+          rawBytes: _mrtdData!.dg5!.toBytes(),
         ),
       );
     }
@@ -902,7 +894,7 @@ class _MrtdHomePageState extends State<MrtdHomePage>
         _makeMrtdDataWidget(
           header: 'EF.DG6',
           collapsedText: '',
-          dataText: _mrtdData!.dg6!.toBytes().hex(),
+          rawBytes: _mrtdData!.dg6!.toBytes(),
         ),
       );
     }
@@ -912,7 +904,7 @@ class _MrtdHomePageState extends State<MrtdHomePage>
         _makeMrtdDataWidget(
           header: 'EF.DG7',
           collapsedText: '',
-          dataText: _mrtdData!.dg7!.toBytes().hex(),
+          rawBytes: _mrtdData!.dg7!.toBytes(),
         ),
       );
     }
@@ -922,7 +914,7 @@ class _MrtdHomePageState extends State<MrtdHomePage>
         _makeMrtdDataWidget(
           header: 'EF.DG8',
           collapsedText: '',
-          dataText: _mrtdData!.dg8!.toBytes().hex(),
+          rawBytes: _mrtdData!.dg8!.toBytes(),
         ),
       );
     }
@@ -932,7 +924,7 @@ class _MrtdHomePageState extends State<MrtdHomePage>
         _makeMrtdDataWidget(
           header: 'EF.DG9',
           collapsedText: '',
-          dataText: _mrtdData!.dg9!.toBytes().hex(),
+          rawBytes: _mrtdData!.dg9!.toBytes(),
         ),
       );
     }
@@ -942,7 +934,7 @@ class _MrtdHomePageState extends State<MrtdHomePage>
         _makeMrtdDataWidget(
           header: 'EF.DG10',
           collapsedText: '',
-          dataText: _mrtdData!.dg10!.toBytes().hex(),
+          rawBytes: _mrtdData!.dg10!.toBytes(),
         ),
       );
     }
@@ -952,7 +944,7 @@ class _MrtdHomePageState extends State<MrtdHomePage>
         _makeMrtdDataWidget(
           header: 'EF.DG11',
           collapsedText: '',
-          dataText: _mrtdData!.dg11!.toBytes().hex(),
+          rawBytes: _mrtdData!.dg11!.toBytes(),
         ),
       );
     }
@@ -962,18 +954,17 @@ class _MrtdHomePageState extends State<MrtdHomePage>
         _makeMrtdDataWidget(
           header: 'EF.DG12',
           collapsedText: '',
-          dataText: _mrtdData!.dg12!.toBytes().hex(),
+          rawBytes: _mrtdData!.dg12!.toBytes(),
         ),
       );
     }
 
     if (_mrtdData!.dg13 != null) {
-      readEfDG13(_mrtdData!.dg13!.toBytes());
       list.add(
         _makeMrtdDataWidget(
           header: 'EF.DG13',
           collapsedText: '',
-          dataText: _mrtdData!.dg13!.toBytes().hex(),
+          rawBytes: _mrtdData!.dg13!.toBytes(),
         ),
       );
     }
@@ -983,7 +974,7 @@ class _MrtdHomePageState extends State<MrtdHomePage>
         _makeMrtdDataWidget(
           header: 'EF.DG14',
           collapsedText: '',
-          dataText: _mrtdData!.dg14!.toBytes().hex(),
+          rawBytes: _mrtdData!.dg14!.toBytes(),
         ),
       );
     }
@@ -993,7 +984,7 @@ class _MrtdHomePageState extends State<MrtdHomePage>
         _makeMrtdDataWidget(
           header: 'EF.DG15',
           collapsedText: '',
-          dataText: _mrtdData!.dg15!.toBytes().hex(),
+          rawBytes: _mrtdData!.dg15!.toBytes(),
         ),
       );
     }
@@ -1013,7 +1004,7 @@ class _MrtdHomePageState extends State<MrtdHomePage>
         _makeMrtdDataWidget(
           header: 'EF.DG16',
           collapsedText: '',
-          dataText: _mrtdData!.dg16!.toBytes().hex(),
+          rawBytes: _mrtdData!.dg16!.toBytes(),
         ),
       );
     }
@@ -1328,7 +1319,7 @@ class _MrtdHomePageState extends State<MrtdHomePage>
     bool platformEnabled = true,
   }) => TextFormField(
     controller: controller,
-    enabled: platformEnabled && !_disabledInput(),
+    enabled: platformEnabled && !_isReading,
     readOnly: onTap != null,
     onTap: onTap,
     keyboardType: keyboardType,
@@ -1367,18 +1358,17 @@ class _MrtdHomePageState extends State<MrtdHomePage>
     label: label,
     asset: 'assets/images/calendar.png',
     onTap: () async {
-      final now = DateTime.now();
-      final firstDate = isDob ? DateTime(now.year - 90) : now;
-      final lastDate =
-          isDob ? DateTime(now.year - 15) : DateTime(now.year + 10, 6);
-      final current = isDob ? _getDOBDate() : _getDOEDate();
+      final range = DocumentDateRange(
+        text: controller.text,
+        isBirthDate: isDob,
+      );
       final date = await _pickDate(
         context,
-        firstDate,
-        current ?? (isDob ? lastDate : firstDate),
-        lastDate,
+        range.first,
+        range.initial,
+        range.last,
       );
-      if (date != null) controller.text = date;
+      if (mounted && date != null) controller.text = date;
     },
   );
 
